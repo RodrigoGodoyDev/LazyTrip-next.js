@@ -224,7 +224,7 @@
     "*.env": "${capture}.env.*"
   },
   "explorer.compactFolders": false, // Mejor visibilidad de estructura
-  "explorer.confirmDelete": true,
+  "explorer.confirmDelete": false,
   "explorer.confirmDragAndDrop": true,
   // =====================
   //? Git Settings

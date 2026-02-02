@@ -1,0 +1,135 @@
+openapi: 3.0.3
+info:
+  title: LazyTrip API
+  description: API interna para la aplicación LazyTrip (Next.js Server Actions/Routes)
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development
+
+components:
+  securitySchemes:
+    supabaseAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Trip:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        destination:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        budget:
+          type: number
+
+    FlightSearchResult:
+      type: object
+      properties:
+        destination:
+          type: string
+        price:
+          type: number
+        currency:
+          type: string
+        deepLink:
+          type: string
+
+paths:
+  /search/smart-hunter:
+    get:
+      summary: Búsqueda inversa de vuelos por presupuesto
+      security:
+        - supabaseAuth: []
+      parameters:
+        - name: budget
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: origin
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: month
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de destinos viables
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FlightSearchResult'
+
+  /trips:
+    get:
+      summary: Obtener viajes del usuario
+      security:
+        - supabaseAuth: []
+      responses:
+        '200':
+          description: Lista de viajes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Trip'
+    post:
+      summary: Crear nuevo viaje
+      security:
+        - supabaseAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [destination, startDate, endDate]
+              properties:
+                destination: { type: string }
+                startDate: { type: string, format: date }
+                endDate: { type: string, format: date }
+      responses:
+        '201':
+          description: Viaje creado
+
+  /trips/{tripId}/packing-list:
+    post:
+      summary: Generar lista de equipaje con IA
+      security:
+        - supabaseAuth: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Lista generada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { type: string }
+                        items: { type: array, items: { type: string } }
